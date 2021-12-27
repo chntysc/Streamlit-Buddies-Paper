@@ -6,9 +6,18 @@ from pathlib import Path
 import plotly.graph_objects as go
 import matplotlib.image as mpimg
 
-
-
+st.set_page_config(layout="wide")
 st.title('Dashboard for Ocean Wind and Wave Data on Indonesia Fisheries Management Area 711')
+st.subheader('WPP-711')
+st.write('WPP-RI 711 is a fisheries management area in Indonesia consisted of Natuna Sea, Karimata Strait, and some part of South China Sea as well as bordering 6 provinces; Riau, Riau Islands, Jambi, Bangka Belitung Islands, West Kalimantan, and South Sumatra. ')
+img = mpimg.imread(Path(__file__).parents[0] / 'dataframe/WPP-711.jpg')
+st.image(img)
+st.write('sc : https://www.researchgate.net/figure/Areas-map-according-to-priority-values-of-four-working-units-in-WPP-711_fig3_322161929')
+st.write('This dashboard lets you observe these parameters in WPP-RI 711:')
+st.write('1. Wind speed and direction (seasonal, monthly, annual)')
+st.write('2. Significant wave height (seasonal, monthly, annual)')
+st.write('3. Significant wave height prediction (daily)')
+st.write('Data source: ECMWF ERA-5')
 
 # Reading Data CSV
 #domain area
@@ -25,22 +34,25 @@ stat_wind = pd.read_csv(Path(__file__).parents[0] / 'dataframe/descriptive_stati
 df_swh = pd.read_csv(Path(__file__).parents[0] / 'dataframe/df_swh.csv',index_col=0)
 df_wind = pd.read_csv(Path(__file__).parents[0] / 'dataframe/df_wind.csv',index_col=0)
 
-def data_view(data,title):
-    st.subheader(title)
-    df = data
-    st.write(df)
+def data_view(area,meta,stat):
+    col1,col2 = st.beta_columns(2)
+    with col1:
+        st.subheader('Domain Area')
+        st.dataframe(area)
+    with col2:
+        st.subheader('Metadata')
+        st.dataframe(meta)
+    
+    st.subheader('Statistic Descriptive')
+    st.dataframe(stat)
 
 def data_overview():
     st.header('Summary Statistic')
     data_type = st.selectbox("data type", ['SWH', 'Wind'])
     if data_type == 'SWH':
-        data_view(area_swh,'Domain Area')
-        data_view(meta_swh,'Metadata')
-        data_view(stat_swh,'Statistic Descriptive')
+        data_view(area_swh,meta_swh,stat_swh)
     elif data_type == 'Wind':
-        data_view(area_wind,'Domain Area')
-        data_view(meta_wind,'Metadata')
-        data_view(stat_wind,'Statistic Descriptive')
+        data_view(area_wind,meta_wind,stat_wind)
 
 def plot_timeseries(df, title ,var, yaxis): 
 #data = data nc , title = variabel judul , misal SWH atau wind, var = variable yang ingin di cari cth 'wind', yaxis = judul yaxisnya apa cth : 'wind (m/s)'
@@ -103,7 +115,7 @@ def period_time(var):
 
 #sidebar menu
 st.sidebar.title('Navigation')
-processing_type = st.sidebar.radio("Information", ('Summary Statistic', 'Data Visualisation'))
+processing_type = st.sidebar.radio("Information", ('Summary Statistic', 'Data Visualisation','Data Prediction'))
 
 if processing_type =='Summary Statistic':
     data_overview()
